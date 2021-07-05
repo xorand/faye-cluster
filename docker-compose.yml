@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  redis-master:
+    image: "redis"
+
+  redis-slave:    
+    image: "redis"
+    command: redis-server --slaveof redis-master 6379
+    depends_on:
+    - redis-master
+
+  redis-sentinel-1:
+    build: sentinel
+    ports:
+    - 26379
+    depends_on:
+    - redis-master
+
+  redis-sentinel-2:
+    build: sentinel
+    ports:
+    - 26379
+    depends_on:      
+    - redis-master
+
+  redis-sentinel-3:
+    build: sentinel
+    ports:
+    - 26379
+    depends_on:      
+    - redis-master
+    
+  faye-cluster:
+    scale: 3
+    build: cluster
+    environment:
+      # can be 'noredis' / 'single' / 'sentinel'
+      REDIS_TYPE: sentinel
+      # for single redis deployment
+      REDIS_HOST: redis-master
+      REDIS_PORT: 6379
+      # for sentinels deployment
+      REDIS_SENTINELS: redis-sentinel-1,redis-sentinel-2,redis-sentinel-3
+      REDIS_SENTINELS_PORT: 26379
+    depends_on:
+    - redis-master
+    - redis-slave
+    - redis-sentinel-1
+    - redis-sentinel-2
+    - redis-sentinel-3
+    ports:
+    - 8080
+
+  faye-client:
+    scale: 10
+    build: client
+    environment:
+      FAYE_SERVER: http://faye-cluster:8080
+      FAYE_CHANNEL: msgs
+    depends_on:
+    - faye-cluster
+
+  faye-publish:
+    build: client
+    entrypoint: node faye_publish.js
+    environment:
+      FAYE_SERVER: http://faye-cluster:8080
+      FAYE_CHANNEL: msgs
+    depends_on:
+    - faye-cluster

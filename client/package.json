@@ -1,0 +1,12 @@
+{
+    "name": "faye_client",
+    "version": "0.0.1a",
+    "private": true,
+    "dependencies": {
+      "faye": "latest",
+      "alert": "latest"
+    },
+    "scripts": {
+      "start": "node faye_client.js"
+    }
+}

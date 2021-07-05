@@ -1,0 +1,14 @@
+{
+    "name": "faye_cluster",
+    "version": "0.0.1a",
+    "private": true,
+    "dependencies": {
+      "faye": "latest",
+      "faye-ioredis": "^0.2.0",
+      "ioredis": "latest",
+      "alert": "latest"
+    },
+    "scripts": {
+      "start": "node faye.js"
+    }
+}
